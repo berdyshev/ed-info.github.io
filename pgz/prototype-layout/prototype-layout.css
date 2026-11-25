@@ -201,3 +201,8 @@
 
 /* редактор зображень (iframe): рамка */
 [data-proto=A] #drawEditorFrame { border: 1px solid #3c3c3c !important; border-radius: 10px !important; box-shadow: 0 16px 48px rgba(0, 0, 0, .6); background: #1e1e1e !important; }
+
+/* гра в окремому вікні: на сторінці модальне вікно гри не показуємо */
+.proto-popped #gameModal { visibility: hidden !important; }
+#protoPopoutBtn { all: unset; cursor: pointer; color: #ddd; font-size: 18px; width: 28px; text-align: center; border-radius: 6px; }
+#protoPopoutBtn:hover { background: #ffffff22; color: #fff; }

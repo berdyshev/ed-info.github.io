@@ -288,6 +288,78 @@
     }).observe(document.body, { childList: true });
   }
 
+  // ---------- гра в окремому вікні браузера (спайк) ----------
+  // Skulpt і ігровий цикл лишаються на основній сторінці. У вікно (window.open) переносимо
+  // сам елемент <canvas>: його 2D-контекст і обробники миші їдуть разом з ним.
+  // Клавіші з вікна передаємо в PythonIDE.keyHandlers (так pgz слухає клавіатуру).
+  // Браузер дозволяє window.open лише по кліку, тому вікно відкриває кнопка ⧉,
+  // а далі воно лишається відкритим для наступних запусків.
+  function gamePopout() {
+    const gm = $('gameModal'), inner = gm.firstElementChild, header = inner.firstElementChild;
+    let popup = null, canvas = null, origRaf = window.requestAnimationFrame.bind(window);
+    const isOpen = () => popup && !popup.closed;
+
+    const btn = el('<button id="protoPopoutBtn" title="Відкрити гру в окремому вікні (можна перетягнути на інший екран)">⧉</button>');
+    header.firstElementChild.replaceWith(btn);
+
+    function homeCanvas() {
+      // повертаємо canvas на сторінку: pgz шукає його через document.getElementById
+      const c = canvas || $('gameCanvas');
+      if (c && c.ownerDocument !== document) inner.appendChild(document.adoptNode(c));
+      document.documentElement.classList.remove('proto-popped');
+      window.requestAnimationFrame = origRaf;
+    }
+    function moveToPopup() {
+      const c = $('gameCanvas'); // null, якщо canvas уже у вікні
+      if (!isOpen() || !c || !c.width) return;
+      canvas = c;
+      const d = popup.document;
+      d.title = $('gameTitle').textContent || 'Pygame Zero';
+      d.body.replaceChildren(d.adoptNode(canvas));
+      canvas.style.width = canvas.width + 'px'; canvas.style.height = canvas.height + 'px';
+      // вікно під розмір гри (outer = inner + рамка браузера)
+      const dw = popup.outerWidth - popup.innerWidth, dh = popup.outerHeight - popup.innerHeight;
+      if (popup.innerWidth !== canvas.width || popup.innerHeight !== canvas.height)
+        popup.resizeTo(canvas.width + dw, canvas.height + dh);
+      // кадри рахує вікно гри: гра не зупиниться, навіть якщо основне вікно згорнуте
+      window.requestAnimationFrame = (cb) => (isOpen() ? popup.requestAnimationFrame(cb) : origRaf(cb));
+      document.documentElement.classList.add('proto-popped');
+    }
+    function openPopup() {
+      const c = $('gameCanvas');
+      const w = (c && c.width) || 640, h = (c && c.height) || 480;
+      popup = window.open('', 'pgzGameWindow', `popup=yes,width=${w},height=${h}`);
+      if (!popup) { PythonIDE.showHint('Браузер заблокував окреме вікно. Дозвольте спливаючі вікна для цього сайту.'); return; }
+      const d = popup.document;
+      d.open(); d.write('<!doctype html><meta charset="utf-8"><title>Pygame Zero</title>' +
+        '<style>html,body{margin:0;height:100%;background:#000;overflow:hidden;display:grid;place-items:center}canvas{display:block}</style><body></body>'); d.close();
+      const fwd = (e) => {
+        if (!PythonIDE.running) return;
+        if ([32, 37, 38, 39, 40].includes(e.keyCode)) e.preventDefault();
+        PythonIDE.keyHandlers.slice().forEach((h) => { try { h(e); } catch (err) {} });
+      };
+      popup.addEventListener('keydown', fwd);
+      popup.addEventListener('keyup', fwd);
+      popup.addEventListener('contextmenu', (e) => e.preventDefault());
+      // закрили вікно гри → як хрестик: зупинити програму
+      popup.addEventListener('pagehide', () => { homeCanvas(); if (PythonIDE.running) PythonIDE.stop(); });
+      moveToPopup();
+      popup.focus();
+    }
+    btn.onclick = openPopup;
+
+    // перед кожним запуском і зупинкою canvas має бути на сторінці
+    const origRun = PythonIDE.runCode, origStop = PythonIDE.stop;
+    PythonIDE.runCode = function () { homeCanvas(); return origRun.apply(this, arguments); };
+    PythonIDE.stop = function () { homeCanvas(); return origStop.apply(this, arguments); };
+
+    // pgzrun.go() задає canvas.width/height → після цього переносимо у вікно (якщо воно відкрите)
+    new MutationObserver(() => {
+      const c = $('gameCanvas');
+      if (isOpen() && c && gm.style.display !== 'none') setTimeout(() => { moveToPopup(); popup.focus(); }, 0);
+    }).observe(gm, { attributes: true, subtree: true, attributeFilter: ['width', 'height', 'style'] });
+  }
+
   // Гра більше не перекриває редактор, тому клавіші, набрані в редакторі,
   // не віддаємо грі (у pgz усі натискання під час гри йдуть у гру).
   // Клік по полю гри знімає фокус з редактора, і клавіші знову йдуть у гру.
@@ -306,6 +378,7 @@
   window.addEventListener('load', () => setTimeout(() => {
     initA();
     editorKeysStayInEditor();
+    gamePopout();
     refreshEditor();
   }, 0));
 })();
