@@ -164,7 +164,8 @@
   background: url("../media/splash.png") no-repeat #140b20; background-size: 100px auto; background-position: -17px -45px;
 }
 /* назва проєкту по центру панелі */
-[data-proto=A] #projectNameInput { position: absolute; left: 50%; transform: translateX(-50%); top: 0; text-align: center; }
+/* по центру панелі; вертикально на одній лінії з кнопками (їхній центр = 30px) */
+[data-proto=A] #projectNameInput { position: absolute; left: 50%; top: 30px; transform: translate(-50%, -50%); margin: 0 !important; text-align: center; }
 [data-proto=A] #hintBar { display: none !important; }
 #protoToast {
   position: fixed; right: 16px; bottom: 70px; z-index: 100001; max-width: 360px; padding: 10px 14px;
