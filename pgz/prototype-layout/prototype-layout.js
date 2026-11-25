@@ -3,7 +3,7 @@
 // Стан тільки в пам'яті. Не мерджити в main: переможця переписати начисто.
 (function () {
   const VARIANTS = {
-    A: 'IDE: смужка іконок + док гри',
+    A: 'IDE: смужка іконок + окреме вікно гри',
     B: 'Мінімальні перемикачі + плаваюча гра',
     C: 'Висувні шухляди + гра «картинка в картинці»',
   };
@@ -99,75 +99,101 @@
   }
 
   // ========== A: IDE ==========
+  // Іконки (SVG, щоб не залежати від шрифтів з емодзі)
+  const ICON = {
+    images: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="M4 18l5-5 3 3 3-4 5 6"/></svg>',
+    audio: '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/></svg>',
+    music: '<svg viewBox="0 0 24 24"><path d="M9 18V6l11-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>',
+    handbook: '<svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2z"/><path d="M4 21V5M8 7h7M8 11h7"/></svg>',
+    togglePanel: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><rect class="fill" x="14" y="4" width="7" height="16"/></svg>',
+    toggleConsole: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><rect class="fill" x="3" y="14" width="18" height="6"/></svg>',
+  };
   function initA() {
     const main = $('mainLayout'), right = $('rightBar'), cons = $('consoleContainer');
-    let tab = null, autoGame = false;
+    const gallery = $('resourceGallery');
+    let tab = 'images';
 
-    // права панель: заголовок + ресайзер + док гри
+    // кнопки галереї, імпорту, редактора й посібника переїжджають з верхньої панелі на бокову
+    document.querySelectorAll('#toolPanel [onclick*="toggleShowGallery"], #toolPanel [onclick*="openImportModal"], #toolPanel [onclick*="showEditor"], #toolPanel [onclick*="showHandbook"]')
+      .forEach((b) => (b.style.display = 'none'));
+
+    // кнопки розкладки, як у правому верхньому куті VS Code
+    const layout = el(`<div id="protoLayoutBtns">
+      <button data-t="console" title="Показати/сховати консоль (Ctrl+J)">${ICON.toggleConsole}</button>
+      <button data-t="panel" title="Показати/сховати бокову панель (Ctrl+B)">${ICON.togglePanel}</button></div>`);
+    $('projectNameInput').before(layout);
+
+    // права панель: заголовок з діями + ресайзер
     const head = el(`<div id="protoPanelHead"><span id="protoPanelTitle"></span>
-      <button class="proto-iconbtn" title="Сховати (Ctrl+B)">✕</button></div>`);
+      <span class="actions"></span>
+      <button class="proto-iconbtn" data-a="close" title="Сховати панель">✕</button></div>`);
     right.prepend(head);
     right.prepend(el('<div id="protoPanelResizer"></div>'));
-    const dock = el('<div id="protoGameDock" style="display:none"><div class="empty">Натисніть ▶, щоб запустити гру тут</div></div>');
-    right.appendChild(dock);
-    dock.appendChild($('gameModal'));
     right.classList.add('proto-closed');
 
-    const bar = el(`<div id="protoActivity">
-      <button data-tab="gallery" title="Галерея ресурсів"><img src="./media/gallery.png"></button>
-      <button data-tab="handbook" title="Посібник"><img src="./media/pgz-handbook.png"></button>
-      <button data-tab="game" title="Гра"><img src="./media/play.png"></button>
-      <div class="hint">Ctrl+B<br>панель<br><br>Ctrl+J<br>консоль</div></div>`);
+    const TABS = {
+      images: { title: 'Зображення', frame: 'imagesFrame', actions: [
+        ['./media/add_file.png', 'Додати', 'Додати файл з комп\'ютера', () => addFile('image')],
+        ['./media/import.png', 'Імпорт', 'Імпорт з онлайн-галереї', () => openImportModal()],
+        ['./media/img-edit.png', 'Намалювати', 'Редактор зображень', () => showEditor()],
+      ] },
+      audio: { title: 'Аудіо', frame: 'soundsFrame', actions: [['./media/add_file.png', 'Додати', 'Додати аудіофайл', () => addFile('audio')]] },
+      music: { title: 'Музика', frame: 'musicFrame', actions: [['./media/add_file.png', 'Додати', 'Додати музику', () => addFile('music')]] },
+      handbook: { title: 'Посібник', actions: [] },
+    };
+    const bar = el(`<div id="protoActivity">${Object.keys(TABS).map((t) =>
+      `<button data-tab="${t}" title="${TABS[t].title}">${ICON[t]}<span>${TABS[t].title}</span></button>`).join('')}</div>`);
     main.appendChild(bar);
 
-    const titles = { gallery: 'Галерея ресурсів', handbook: 'Посібник', game: 'Гра' };
-    function open(t) {
+    const panelOpen = () => !right.classList.contains('proto-closed');
+    async function open(t) {
       tab = t;
       right.classList.remove('proto-closed');
-      showTab(t);
-      $('protoPanelTitle').textContent = titles[t];
-      bar.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.tab === t));
-      state.panel = 'відкрита';
-      refreshEditor();
+      const T = TABS[t];
+      $('protoPanelTitle').textContent = T.title;
+      const actions = head.querySelector('.actions');
+      actions.innerHTML = '';
+      T.actions.forEach(([img, label, title, fn]) => {
+        const b = el(`<button class="proto-action" title="${title}"><img src="${img}">${label}</button>`);
+        b.onclick = fn; actions.appendChild(b);
+      });
+      if (t === 'handbook') {
+        gallery.style.display = 'none';
+        $('handbook').style.display = 'block';
+      } else {
+        $('handbook').style.display = 'none';
+        gallery.style.display = 'block';
+        ['imagesFrame', 'soundsFrame', 'musicFrame'].forEach((id) => ($(id).style.display = id === T.frame ? '' : 'none'));
+        await initializeAssetsGallery();
+      }
+      state.panel = 'відкрита'; state.tab = T.title;
+      sync();
     }
     function close() {
       right.classList.add('proto-closed');
-      bar.querySelectorAll('button').forEach((b) => b.classList.remove('active'));
       state.panel = 'закрита'; state.tab = '-';
-      refreshEditor();
+      sync();
     }
-    const toggle = (t) => (!right.classList.contains('proto-closed') && tab === t ? close() : open(t));
-    bar.querySelectorAll('button').forEach((b) => (b.onclick = () => toggle(b.dataset.tab)));
-    head.querySelector('button').onclick = close;
+    const togglePanel = () => (panelOpen() ? close() : open(tab));
+    const toggleTab = (t) => (panelOpen() && tab === t ? close() : open(t));
+    bar.querySelectorAll('button').forEach((b) => (b.onclick = () => toggleTab(b.dataset.tab)));
+    head.querySelector('[data-a=close]').onclick = close;
     dragResize($('protoPanelResizer'), (ev) => {
-      const w = Math.min(Math.max(innerWidth - ev.clientX - 56, 260), innerWidth * 0.7);
+      const w = Math.min(Math.max(innerWidth - ev.clientX - 64, 260), innerWidth * 0.7);
       document.documentElement.style.setProperty('--proto-pw', w + 'px');
-    });
-
-    // гра відкривається у вкладці «Гра» і повертає панель як було
-    let before = null;
-    onGame((shown) => {
-      dock.querySelector('.empty').style.display = shown ? 'none' : 'block';
-      if (shown) {
-        before = right.classList.contains('proto-closed') ? null : tab;
-        autoGame = true; open('game');
-      } else if (autoGame) {
-        autoGame = false;
-        before ? open(before) : close();
-      }
     });
 
     // консоль: схована, відкривається при виводі/помилці
     const chead = el(`<div id="protoConsoleHead"><span class="tab">Консоль</span>
       <span class="tools"><button class="proto-iconbtn" data-a="clear" title="Очистити">⌫</button>
-      <button class="proto-iconbtn" data-a="close" title="Сховати (Ctrl+J)">✕</button></span></div>`);
+      <button class="proto-iconbtn" data-a="close" title="Сховати консоль">✕</button></span></div>`);
     cons.before(chead);
+    const consOpen = () => cons.style.display !== 'none';
     const setCons = (show) => {
       chead.style.display = cons.style.display = show ? '' : 'none';
       state.console = show ? 'відкрита' : 'схована';
-      refreshEditor();
+      sync();
     };
-    setCons(false);
     chead.querySelector('[data-a=close]').onclick = () => setCons(false);
     chead.querySelector('[data-a=clear]').onclick = () => [...$('output').childNodes].forEach((n) => !n.id && !(n.querySelector && n.querySelector('#btn_showREPL')) && n.remove());
     dragResize(chead, (ev) => {
@@ -178,10 +204,26 @@
     onOutput(() => setCons(true));
     onError(() => setCons(true));
 
-    window.toggleShowGallery = () => toggle('gallery');
-    window.showHandbook = () => toggle('handbook');
-    window.showConsole = () => setCons(cons.style.display === 'none');
-    hotkeys({ b: () => (right.classList.contains('proto-closed') ? open(tab || 'gallery') : close()), j: window.showConsole });
+    // підсвітка активних кнопок
+    function sync() {
+      bar.querySelectorAll('button').forEach((b) => b.classList.toggle('active', panelOpen() && b.dataset.tab === tab));
+      layout.querySelector('[data-t=panel]').classList.toggle('on', panelOpen());
+      layout.querySelector('[data-t=console]').classList.toggle('on', consOpen());
+      refreshEditor();
+    }
+    layout.querySelector('[data-t=panel]').onclick = togglePanel;
+    layout.querySelector('[data-t=console]').onclick = () => setCons(!consOpen());
+    setCons(false);
+
+    window.toggleShowGallery = () => toggleTab('images');
+    window.showHandbook = () => toggleTab('handbook');
+    window.showConsole = () => setCons(!consOpen());
+    hotkeys({ b: togglePanel, j: window.showConsole });
+
+    // гра: окреме вікно розміру WIDTH×HEIGHT, не блокує сторінку, тягнеться за заголовок
+    const inner = $('gameModal').firstElementChild;
+    makeDraggable(inner, inner.firstElementChild);
+    onGame(() => {});
   }
 
   // ========== B: мінімальні перемикачі ==========

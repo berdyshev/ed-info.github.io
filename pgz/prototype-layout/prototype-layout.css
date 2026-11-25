@@ -21,41 +21,55 @@
 #rightBar { font-size: 0; } /* ховає зайвий «;» після iframe */
 #rightBar > * { font-size: 14px; }
 
-/* ========== A: IDE (activity bar + док) ========== */
+/* ========== A: IDE (activity bar + окреме вікно гри) ========== */
 [data-proto=A] #rightBar {
-  flex: 0 0 var(--proto-pw, 440px) !important; width: auto !important; max-width: none !important;
+  flex: 0 0 var(--proto-pw, 400px) !important; width: auto !important; max-width: none !important;
   margin: 20px 0 20px 6px !important; position: relative; background: #1e1e1e !important;
-  border-radius: 10px; overflow: hidden;
+  border-radius: 10px; overflow: hidden; display: flex !important; flex-direction: column;
 }
 [data-proto=A] #rightBar.proto-closed { display: none !important; }
-[data-proto=A] #rightBar > #handbook,
-[data-proto=A] #rightBar > #resourceGallery { margin: 0 !important; height: calc(100% - 32px) !important; width: 100%; }
-[data-proto=A] #resourceGallery { overflow: auto; margin-top: 0 !important; }
+[data-proto=A] #rightBar > #handbook { margin: 0 !important; flex: 1; height: auto !important; width: 100%; border: 0; }
+[data-proto=A] #resourceGallery { flex: 1; overflow: auto; margin: 0 !important; }
+[data-proto=A] #resourceGallery .frame { width: auto; max-height: none !important; margin: 10px; height: calc(100% - 20px); box-sizing: border-box; }
+[data-proto=A] #resourceGallery .frame h3 { display: none; }
+[data-proto=A] #resourceGallery .controls-bar > button:first-child { display: none; } /* «➕» переїхав у заголовок панелі */
+[data-proto=A] #resourceGallery .controls-bar:not(:has(.file-controls[style*="inline"])) { display: none; }
+[data-proto=A] #resourceGallery .assets-items-scroll { max-width: none; flex: 1; }
 #protoPanelHead {
-  height: 32px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px;
-  background: #252526; color: #ddd; font: 600 12px system-ui, sans-serif; letter-spacing: .05em; text-transform: uppercase;
+  flex: 0 0 auto; min-height: 36px; display: flex; align-items: center; gap: 6px; padding: 2px 8px;
+  background: #252526; color: #ddd; font: 600 12px system-ui, sans-serif;
 }
+#protoPanelTitle { letter-spacing: .05em; text-transform: uppercase; margin-right: auto; }
+#protoPanelHead { flex-wrap: wrap; }
+#protoPanelHead .actions { display: flex; flex-wrap: wrap; gap: 4px; order: 3; width: 100%; padding-bottom: 6px; }
+#protoPanelHead .actions:empty { display: none; }
+.proto-action {
+  all: unset; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px;
+  background: #3a3d41; color: #eee; font: 12px system-ui, sans-serif;
+}
+.proto-action:hover { background: #007acc; }
+.proto-action img { width: 18px; height: 18px; }
 #protoPanelResizer { position: absolute; left: 0; top: 0; bottom: 0; width: 6px; cursor: col-resize; z-index: 5; }
 #protoPanelResizer:hover, .proto-resizing #protoPanelResizer { background: #007acc; }
 #protoActivity {
-  flex: 0 0 48px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding-top: 20px;
-  background: #2a2a2a; margin-right: 8px;
+  flex: 0 0 68px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 20px;
+  background: #2a2a2a; margin-right: 6px;
 }
 #protoActivity button {
-  all: unset; cursor: pointer; width: 40px; height: 40px; display: grid; place-items: center; font-size: 22px;
-  border-left: 3px solid transparent; opacity: .6; border-radius: 4px;
+  all: unset; cursor: pointer; width: 66px; padding: 6px 0; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  color: #aaa; border-right: 3px solid transparent; font: 10px system-ui, sans-serif;
 }
-#protoActivity button:hover { opacity: 1; background: #ffffff14; }
-#protoActivity button.active { opacity: 1; border-left-color: #fff; }
-#protoActivity button img { width: 30px; height: 30px; }
-#protoActivity .hint { color: #888; font: 10px system-ui; text-align: center; margin-top: 8px; }
-#protoGameDock { height: calc(100% - 32px); overflow: auto; background: #111; }
-#protoGameDock .empty { color: #888; font: 13px system-ui; padding: 20px; text-align: center; }
-[data-proto=A] #gameModal {
-  position: static !important; width: 100% !important; height: auto !important; z-index: auto !important;
-}
-[data-proto=A] #gameModal > div { width: 100% !important; height: auto !important; max-width: none !important; border-radius: 0 !important; }
-[data-proto=A] #gameCanvas { width: 100% !important; height: auto !important; }
+#protoActivity button:hover { color: #fff; background: #ffffff10; }
+#protoActivity button.active { color: #fff; border-right-color: #4fc3f7; }
+#protoActivity svg, #protoLayoutBtns svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+#protoLayoutBtns { display: flex; gap: 4px; margin: 20px 10px 0 0; }
+[data-proto=A] #hintBar { flex: 1; text-align: center; }
+#protoLayoutBtns button { all: unset; cursor: pointer; color: #888; padding: 4px; border-radius: 6px; display: grid; }
+#protoLayoutBtns button:hover { background: #ffffff18; color: #fff; }
+#protoLayoutBtns button .fill { fill: transparent; stroke: none; }
+#protoLayoutBtns button.on { color: #fff; }
+#protoLayoutBtns button.on .fill { fill: currentColor; }
+#protoLayoutBtns svg { width: 22px; height: 22px; }
 
 /* консоль A: нижня панель як у VS Code */
 [data-proto=A] #consoleContainer {
@@ -95,9 +109,9 @@
 #protoStatus .badge { background: #ff9800; border-radius: 999px; padding: 0 7px; font-weight: 700; }
 
 /* гра B/C: не блокує сторінку, вікно можна тягати */
-[data-proto=B] #gameModal, [data-proto=C] #gameModal { pointer-events: none; }
-[data-proto=B] #gameModal > div, [data-proto=C] #gameModal > div { pointer-events: auto; box-shadow: 0 10px 40px rgba(0,0,0,.7); }
-[data-proto=B] #gameModal > div > div:first-child { cursor: move; }
+[data-proto=A] #gameModal, [data-proto=B] #gameModal, [data-proto=C] #gameModal { pointer-events: none; }
+[data-proto=A] #gameModal > div, [data-proto=B] #gameModal > div, [data-proto=C] #gameModal > div { pointer-events: auto; box-shadow: 0 10px 40px rgba(0,0,0,.7); }
+[data-proto=A] #gameModal > div > div:first-child, [data-proto=B] #gameModal > div > div:first-child { cursor: move; }
 
 /* ========== C: висувні шухляди, редактор на всю ширину ========== */
 [data-proto=C] #rightBar {
