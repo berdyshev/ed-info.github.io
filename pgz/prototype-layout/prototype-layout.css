@@ -166,6 +166,13 @@
 /* назва проєкту по центру панелі */
 /* по центру панелі; вертикально на одній лінії з кнопками (їхній центр = 30px) */
 [data-proto=A] #projectNameInput { position: absolute; left: 50%; top: 30px; transform: translate(-50%, -50%); margin: 0 !important; text-align: center; }
+/* як поля в діалогах: сіре поле на темній панелі, майже прямі кути (як рядок пошуку в заголовку VS Code) */
+[data-proto=A] #projectNameInput {
+  background: #3c3c3c !important; color: #dddddd !important; border: 1px solid #555 !important; border-radius: 4px !important;
+  height: 28px; padding: 0 10px !important; font: 13px system-ui, "Segoe UI", sans-serif !important; outline: none;
+}
+[data-proto=A] #projectNameInput:hover { border-color: #6a6a6a !important; }
+[data-proto=A] #projectNameInput:focus { border-color: #007acc !important; box-shadow: 0 0 0 1px #007acc; color: #fff !important; }
 [data-proto=A] #hintBar { display: none !important; }
 #protoToast {
   position: fixed; right: 16px; bottom: 70px; z-index: 100001; max-width: 360px; padding: 10px 14px;
