@@ -1,0 +1,129 @@
+/* PROTOTYPE (throwaway) — варіанти макета pgz для issue #73. Не мерджити в main. */
+
+/* ---------- спільне ---------- */
+#protoSwitcher {
+  position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%);
+  z-index: 100000; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: #ffeb3b; color: #111; border: 2px solid #111; border-radius: 999px;
+  padding: 4px 14px; font: 13px/1.3 system-ui, sans-serif; box-shadow: 0 4px 14px rgba(0,0,0,.5);
+  user-select: none;
+}
+#protoSwitcher .row { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+#protoSwitcher button { all: unset; cursor: pointer; font-size: 18px; padding: 0 6px; }
+#protoSwitcher .state { font-size: 11px; opacity: .75; }
+
+.proto-iconbtn {
+  all: unset; cursor: pointer; color: #ccc; padding: 2px 6px; border-radius: 4px; font: 14px system-ui, sans-serif;
+}
+.proto-iconbtn:hover { background: #ffffff22; color: #fff; }
+.proto-err { color: #ff6b6b; }
+#splashImg { display: none !important; }
+#rightBar { font-size: 0; } /* ховає зайвий «;» після iframe */
+#rightBar > * { font-size: 14px; }
+
+/* ========== A: IDE (activity bar + док) ========== */
+[data-proto=A] #rightBar {
+  flex: 0 0 var(--proto-pw, 440px) !important; width: auto !important; max-width: none !important;
+  margin: 20px 0 20px 6px !important; position: relative; background: #1e1e1e !important;
+  border-radius: 10px; overflow: hidden;
+}
+[data-proto=A] #rightBar.proto-closed { display: none !important; }
+[data-proto=A] #rightBar > #handbook,
+[data-proto=A] #rightBar > #resourceGallery { margin: 0 !important; height: calc(100% - 32px) !important; width: 100%; }
+[data-proto=A] #resourceGallery { overflow: auto; margin-top: 0 !important; }
+#protoPanelHead {
+  height: 32px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px;
+  background: #252526; color: #ddd; font: 600 12px system-ui, sans-serif; letter-spacing: .05em; text-transform: uppercase;
+}
+#protoPanelResizer { position: absolute; left: 0; top: 0; bottom: 0; width: 6px; cursor: col-resize; z-index: 5; }
+#protoPanelResizer:hover, .proto-resizing #protoPanelResizer { background: #007acc; }
+#protoActivity {
+  flex: 0 0 48px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding-top: 20px;
+  background: #2a2a2a; margin-right: 8px;
+}
+#protoActivity button {
+  all: unset; cursor: pointer; width: 40px; height: 40px; display: grid; place-items: center; font-size: 22px;
+  border-left: 3px solid transparent; opacity: .6; border-radius: 4px;
+}
+#protoActivity button:hover { opacity: 1; background: #ffffff14; }
+#protoActivity button.active { opacity: 1; border-left-color: #fff; }
+#protoActivity button img { width: 30px; height: 30px; }
+#protoActivity .hint { color: #888; font: 10px system-ui; text-align: center; margin-top: 8px; }
+#protoGameDock { height: calc(100% - 32px); overflow: auto; background: #111; }
+#protoGameDock .empty { color: #888; font: 13px system-ui; padding: 20px; text-align: center; }
+[data-proto=A] #gameModal {
+  position: static !important; width: 100% !important; height: auto !important; z-index: auto !important;
+}
+[data-proto=A] #gameModal > div { width: 100% !important; height: auto !important; max-width: none !important; border-radius: 0 !important; }
+[data-proto=A] #gameCanvas { width: 100% !important; height: auto !important; }
+
+/* консоль A: нижня панель як у VS Code */
+[data-proto=A] #consoleContainer {
+  height: var(--proto-ch, 200px) !important; min-height: 60px !important; max-height: none !important;
+  margin-top: 0 !important; border-radius: 0 0 10px 10px !important;
+}
+#protoConsoleHead {
+  margin: 6px 0 0 10px; height: 28px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 8px; background: #252526; color: #ddd; border-radius: 10px 10px 0 0; cursor: row-resize;
+  font: 600 12px system-ui, sans-serif; letter-spacing: .05em; text-transform: uppercase;
+}
+#protoConsoleHead .tab { border-bottom: 2px solid #007acc; padding: 4px 2px; cursor: default; }
+#protoConsoleHead .tools { cursor: default; }
+
+/* ========== B: мінімальні перемикачі ========== */
+[data-proto=B] #rightBar { position: relative; }
+[data-proto=B] #rightBar.proto-closed {
+  flex: 0 0 30px !important; min-width: 30px !important; width: 30px !important; max-width: 30px !important;
+}
+[data-proto=B] #rightBar.proto-closed > *:not(#protoEdgeBtn):not(#protoEdgeLabel) { display: none !important; }
+#protoEdgeBtn {
+  position: absolute; left: -2px; top: 50%; transform: translateY(-50%); z-index: 6;
+  width: 22px; height: 64px; border: 1px solid #555; border-radius: 6px; background: #3a3a3a; color: #fff;
+  cursor: pointer; font-size: 16px;
+}
+#protoEdgeBtn:hover { background: #007acc; }
+#protoEdgeLabel {
+  display: none; writing-mode: vertical-rl; color: #aaa; font: 12px system-ui; margin: 40px auto 0; cursor: pointer;
+}
+[data-proto=B] #rightBar.proto-closed #protoEdgeLabel { display: block; }
+[data-proto=B] #consoleContainer { min-height: 120px !important; margin-top: 0 !important; border-radius: 0 0 10px 10px !important; }
+#protoStatus {
+  margin: 6px 0 0 10px; height: 26px; display: flex; align-items: center; gap: 8px; padding: 0 10px;
+  background: #007acc; color: #fff; border-radius: 8px; font: 12px system-ui, sans-serif; cursor: pointer;
+}
+#protoStatus.open { border-radius: 8px 8px 0 0; }
+#protoStatus .badge { background: #ff9800; border-radius: 999px; padding: 0 7px; font-weight: 700; }
+
+/* гра B/C: не блокує сторінку, вікно можна тягати */
+[data-proto=B] #gameModal, [data-proto=C] #gameModal { pointer-events: none; }
+[data-proto=B] #gameModal > div, [data-proto=C] #gameModal > div { pointer-events: auto; box-shadow: 0 10px 40px rgba(0,0,0,.7); }
+[data-proto=B] #gameModal > div > div:first-child { cursor: move; }
+
+/* ========== C: висувні шухляди, редактор на всю ширину ========== */
+[data-proto=C] #rightBar {
+  position: fixed !important; top: 64px; right: 0; bottom: 12px; z-index: 2500;
+  width: min(480px, 92vw) !important; max-width: none !important; margin: 0 !important;
+  background: #1e1e1e !important; border-radius: 12px 0 0 12px; box-shadow: -10px 0 40px rgba(0,0,0,.6);
+  transition: transform .2s ease;
+}
+[data-proto=C] #rightBar.proto-closed { transform: translateX(105%); }
+[data-proto=C] #rightBar > #handbook,
+[data-proto=C] #rightBar > #resourceGallery { margin: 0 !important; height: calc(100% - 32px) !important; width: 100%; overflow: auto; }
+[data-proto=C] #editorContainer { margin-right: 10px; }
+[data-proto=C] .proto-leftcol { position: relative; margin-right: 10px; }
+[data-proto=C] #consoleContainer {
+  position: absolute !important; left: 10px; right: 0; bottom: 0; z-index: 20; margin: 0 !important;
+  height: 38% !important; min-height: 0 !important; max-height: none !important;
+  border-radius: 0 0 10px 10px !important; box-shadow: 0 -8px 30px rgba(0,0,0,.5); opacity: .97;
+}
+#protoConsoleDrawerHead {
+  position: absolute; left: 10px; right: 0; bottom: 38%; z-index: 21; height: 28px; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 8px; background: #333; color: #eee; border-radius: 10px 10px 0 0;
+  font: 600 12px system-ui, sans-serif;
+}
+/* «картинка в картинці» для гри */
+[data-proto=C] #gameModal.proto-pip > div {
+  position: fixed !important; right: 16px; bottom: 70px; transform: scale(var(--proto-pip, .45)); transform-origin: bottom right;
+}
+[data-proto=C] #gameModal:not(.proto-pip) { background: rgba(0,0,0,.35); pointer-events: auto; }
+#protoPipBtn { all: unset; cursor: pointer; color: #fff; font-size: 16px; padding: 0 6px; }

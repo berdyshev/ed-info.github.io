@@ -2614,6 +2614,8 @@ window.addEventListener('unhandledrejection', function(event) {
 })
 
 </script>
+<!-- PROTOTYPE (throwaway, issue #73): варіанти макета вмикаються лише з ?variant=A|B|C -->
+<script>if (new URLSearchParams(location.search).has('variant')) document.write('<link rel="stylesheet" href="./prototype-layout/prototype-layout.css"><script src="./prototype-layout/prototype-layout.js"><\/script>');</script>
 </body>
 </html>
 
