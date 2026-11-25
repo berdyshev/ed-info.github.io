@@ -12,6 +12,9 @@
   let key = (params.get('variant') || 'A').toUpperCase();
   if (!VARIANTS[key]) key = 'A';
   document.documentElement.dataset.proto = key;
+  // стиль іконок для варіанта A: ?icons=mono (однотонні) або ?icons=color (кольорові)
+  const iconStyle = params.get('icons') === 'color' ? 'color' : 'mono';
+  document.documentElement.dataset.icons = iconStyle;
 
   const state = { panel: 'закрита', tab: '-', console: 'схована', game: 'не запущена' };
   const $ = (id) => document.getElementById(id);
@@ -105,8 +108,21 @@
     audio: '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/></svg>',
     music: '<svg viewBox="0 0 24 24"><path d="M9 18V6l11-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>',
     handbook: '<svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2z"/><path d="M4 21V5M8 7h7M8 11h7"/></svg>',
-    togglePanel: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><rect class="fill" x="14" y="4" width="7" height="16"/></svg>',
-    toggleConsole: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><rect class="fill" x="3" y="14" width="18" height="6"/></svg>',
+    // як у VS Code: рамка і внутрішня межа є завжди, видима частина зафарбована
+    togglePanel: '<svg viewBox="0 0 24 24"><path class="fill" d="M15 4h4a2 2 0 012 2v12a2 2 0 01-2 2h-4z"/><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg>',
+    toggleConsole: '<svg viewBox="0 0 24 24"><path class="fill" d="M3 14h18v4a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 14h18"/></svg>',
+    // верхня панель і дії (для однотонного стилю)
+    run: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" style="stroke:#4caf50"/><path d="M10 8l6 4-6 4z" style="fill:#4caf50;stroke:#4caf50"/></svg>',
+    stop: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" style="stroke:#f44336"/><rect x="9" y="9" width="6" height="6" style="fill:#f44336;stroke:#f44336"/></svg>',
+    newProject: '<svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6M12 12v6M9 15h6"/></svg>',
+    open: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M12 17v-6M9 13l3-3 3 3"/></svg>',
+    save: '<svg viewBox="0 0 24 24"><path d="M5 3h11l5 5v11a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/><path d="M7 3v5h8V3M7 21v-7h10v7"/></svg>',
+    restore: '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 103-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>',
+    share: '<svg viewBox="0 0 24 24"><path d="M7 10l5-5 5 5M12 5v10"/><path d="M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>',
+    settings: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>',
+    add: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+    importOnline: '<svg viewBox="0 0 24 24"><path d="M7 18a5 5 0 01-.6-10A6 6 0 0118 9a4 4 0 01-1 8"/><path d="M12 12v8M9 17l3 3 3-3"/></svg>',
+    draw: '<svg viewBox="0 0 24 24"><path d="M15 4l5 5L9 20H4v-5z"/><path d="M13 6l5 5"/></svg>',
   };
   function initA() {
     const main = $('mainLayout'), right = $('rightBar'), cons = $('consoleContainer');
@@ -116,6 +132,15 @@
     // кнопки галереї, імпорту, редактора й посібника переїжджають з верхньої панелі на бокову
     document.querySelectorAll('#toolPanel [onclick*="toggleShowGallery"], #toolPanel [onclick*="openImportModal"], #toolPanel [onclick*="showEditor"], #toolPanel [onclick*="showHandbook"]')
       .forEach((b) => (b.style.display = 'none'));
+    document.querySelector('#toolPanel [onclick*="showConsole"]').style.display = 'none'; // замінено кнопкою розкладки
+    if (iconStyle === 'mono') {
+      const svgUrl = (svg) => 'data:image/svg+xml,' + encodeURIComponent(
+        svg.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#d4d4d4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" '));
+      const map = { btn_run: 'run', btn_stopRunning: 'stop', btn_pgz_open: 'open', btn_pgz_save: 'save', btn_restore_code: 'restore', btn_show_share: 'share', btn_show_settings: 'settings' };
+      Object.entries(map).forEach(([id, ic]) => $(id) && ($(id).src = svgUrl(ICON[ic])));
+      const np = document.querySelector('#toolPanel [onclick*="createNewProject"]');
+      if (np) np.src = svgUrl(ICON.newProject);
+    }
 
     // кнопки розкладки, як у правому верхньому куті VS Code
     const layout = el(`<div id="protoLayoutBtns">
@@ -133,12 +158,12 @@
 
     const TABS = {
       images: { title: 'Зображення', frame: 'imagesFrame', actions: [
-        ['./media/add_file.png', 'Додати', 'Додати файл з комп\'ютера', () => addFile('image')],
-        ['./media/import.png', 'Імпорт', 'Імпорт з онлайн-галереї', () => openImportModal()],
-        ['./media/img-edit.png', 'Намалювати', 'Редактор зображень', () => showEditor()],
+        ['add', 'Додати', 'Додати файл з комп\'ютера', () => addFile('image')],
+        ['importOnline', 'Імпорт', 'Імпорт з онлайн-галереї', () => openImportModal()],
+        ['draw', 'Намалювати', 'Редактор зображень', () => showEditor()],
       ] },
-      audio: { title: 'Аудіо', frame: 'soundsFrame', actions: [['./media/add_file.png', 'Додати', 'Додати аудіофайл', () => addFile('audio')]] },
-      music: { title: 'Музика', frame: 'musicFrame', actions: [['./media/add_file.png', 'Додати', 'Додати музику', () => addFile('music')]] },
+      audio: { title: 'Аудіо', frame: 'soundsFrame', actions: [['add', 'Додати', 'Додати аудіофайл', () => addFile('audio')]] },
+      music: { title: 'Музика', frame: 'musicFrame', actions: [['add', 'Додати', 'Додати музику', () => addFile('music')]] },
       handbook: { title: 'Посібник', actions: [] },
     };
     const bar = el(`<div id="protoActivity">${Object.keys(TABS).map((t) =>
@@ -153,8 +178,10 @@
       $('protoPanelTitle').textContent = T.title;
       const actions = head.querySelector('.actions');
       actions.innerHTML = '';
-      T.actions.forEach(([img, label, title, fn]) => {
-        const b = el(`<button class="proto-action" title="${title}"><img src="${img}">${label}</button>`);
+      const PNG = { add: './media/add_file.png', importOnline: './media/import.png', draw: './media/img-edit.png' };
+      T.actions.forEach(([icon, label, title, fn]) => {
+        const pic = iconStyle === 'color' ? `<img src="${PNG[icon]}">` : ICON[icon];
+        const b = el(`<button class="proto-action" title="${title}">${pic}${label}</button>`);
         b.onclick = fn; actions.appendChild(b);
       });
       if (t === 'handbook') {
@@ -359,6 +386,11 @@
       <div class="row"><button data-d="-1">‹</button><span>${key} · ${VARIANTS[key]}</span><button data-d="1">›</button></div>
       <div class="state"></div></div>`);
     bar.querySelectorAll('button').forEach((b) => (b.onclick = () => go(+b.dataset.d)));
+    if (key === 'A') {
+      const t = el(`<button class="icons" title="Перемкнути стиль іконок">іконки: ${iconStyle === 'mono' ? 'однотонні' : 'кольорові'} ⇄</button>`);
+      t.onclick = () => { const p = new URLSearchParams(location.search); p.set('icons', iconStyle === 'mono' ? 'color' : 'mono'); location.search = p.toString(); };
+      bar.querySelector('.row').appendChild(t);
+    }
     document.body.appendChild(bar);
     window.addEventListener('keydown', (e) => {
       const a = document.activeElement;

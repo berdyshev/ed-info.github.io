@@ -62,13 +62,25 @@
 #protoActivity button:hover { color: #fff; background: #ffffff10; }
 #protoActivity button.active { color: #fff; border-right-color: #4fc3f7; }
 #protoActivity svg, #protoLayoutBtns svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
-#protoLayoutBtns { display: flex; gap: 4px; margin: 20px 10px 0 0; }
+/* margin-left:auto тримає кнопки праворуч навіть коли #hintBar схований */
+#protoLayoutBtns { display: flex; gap: 4px; margin: 20px 10px 0 auto; }
 [data-proto=A] #hintBar { flex: 1; text-align: center; }
 #protoLayoutBtns button { all: unset; cursor: pointer; color: #888; padding: 4px; border-radius: 6px; display: grid; }
 #protoLayoutBtns button:hover { background: #ffffff18; color: #fff; }
-#protoLayoutBtns button .fill { fill: transparent; stroke: none; }
+#protoLayoutBtns button .fill { fill: none; stroke: none; }
 #protoLayoutBtns button.on { color: #fff; }
 #protoLayoutBtns button.on .fill { fill: currentColor; }
+.proto-action svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* однотонний стиль: SVG-іконки на верхній панелі */
+[data-icons=mono] #toolPanel .toolButton { height: 30px; padding: 5px; border-radius: 8px; }
+[data-icons=mono] #toolPanel .toolButton:hover { background: #ffffff18; }
+/* кольоровий стиль: іконки бокової смужки в кольорах PNG-кнопок */
+[data-icons=color] #protoActivity [data-tab=images] svg { color: #4fc3f7; }
+[data-icons=color] #protoActivity [data-tab=audio] svg { color: #ffb74d; }
+[data-icons=color] #protoActivity [data-tab=music] svg { color: #ba68c8; }
+[data-icons=color] #protoActivity [data-tab=handbook] svg { color: #81c784; }
+[data-icons=color] #protoActivity svg { stroke-width: 2.2; }
+#protoSwitcher .icons { font-size: 12px !important; background: #111; color: #ffeb3b; border-radius: 999px; padding: 2px 10px !important; }
 #protoLayoutBtns svg { width: 22px; height: 22px; }
 
 /* консоль A: нижня панель як у VS Code */
