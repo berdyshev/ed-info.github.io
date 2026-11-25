@@ -1,20 +1,8 @@
-// PROTOTYPE (throwaway) — три варіанти макета pgz для issue #73,
-// перемикаються через ?variant=A|B|C на існуючій сторінці pgz/index.html.
-// Стан тільки в пам'яті. Не мерджити в main: переможця переписати начисто.
+// PROTOTYPE (throwaway) — новий макет pgz у стилі IDE для issue #73.
+// Демо для обговорення; стан тільки в пам'яті. Не мерджити в main: переписати начисто.
 (function () {
-  const VARIANTS = {
-    A: 'IDE: смужка іконок + окреме вікно гри',
-    B: 'Мінімальні перемикачі + плаваюча гра',
-    C: 'Висувні шухляди + гра «картинка в картинці»',
-  };
-  const KEYS = Object.keys(VARIANTS);
-  const params = new URLSearchParams(location.search);
-  let key = (params.get('variant') || 'A').toUpperCase();
-  if (!VARIANTS[key]) key = 'A';
-  document.documentElement.dataset.proto = key;
-  // стиль іконок для варіанта A: ?icons=mono (однотонні) або ?icons=color (кольорові)
-  const iconStyle = params.get('icons') === 'color' ? 'color' : 'mono';
-  document.documentElement.dataset.icons = iconStyle;
+  document.documentElement.dataset.proto = 'A';
+  document.documentElement.dataset.icons = 'mono';
 
   const state = { panel: 'закрита', tab: '-', console: 'схована', game: 'не запущена' };
   const $ = (id) => document.getElementById(id);
@@ -97,17 +85,6 @@
       win.style.position = 'absolute';
     }, (ev) => { win.style.left = ev.clientX - dx + 'px'; win.style.top = ev.clientY - dy + 'px'; });
   }
-  // показати потрібний вміст правої панелі через оригінальні функції сторінки
-  const origShowGallery = window.showGallery;
-  function showTab(tab) {
-    $('handbook').style.display = tab === 'handbook' ? 'block' : 'none';
-    $('resourceGallery').style.display = 'none';
-    const dock = $('protoGameDock');
-    if (dock) dock.style.display = tab === 'game' ? 'block' : 'none';
-    if (tab === 'gallery') origShowGallery();
-    state.tab = { gallery: 'галерея', handbook: 'посібник', game: 'гра' }[tab];
-  }
-
   // ========== A: IDE ==========
   // Іконки (SVG, щоб не залежати від шрифтів з емодзі)
   const ICON = {
@@ -141,7 +118,7 @@
     document.querySelectorAll('#toolPanel [onclick*="toggleShowGallery"], #toolPanel [onclick*="openImportModal"], #toolPanel [onclick*="showEditor"], #toolPanel [onclick*="showHandbook"]')
       .forEach((b) => (b.style.display = 'none'));
     document.querySelector('#toolPanel [onclick*="showConsole"]').style.display = 'none'; // замінено кнопкою розкладки
-    if (iconStyle === 'mono') {
+    {
       // src не чіпаємо: pgz за ним вирішує, що робить кнопка «Виконати» (lib.js: imgSrc === "./media/play.png").
       // Однотонну іконку показуємо через CSS content, за ім'ям файлу в src.
       const svgUrl = (svg) => 'data:image/svg+xml,' + encodeURIComponent(
@@ -192,10 +169,8 @@
       $('protoPanelTitle').textContent = T.title;
       const actions = head.querySelector('.actions');
       actions.innerHTML = '';
-      const PNG = { add: './media/add_file.png', importOnline: './media/import.png', draw: './media/img-edit.png' };
       T.actions.forEach(([icon, label, title, fn]) => {
-        const pic = iconStyle === 'color' ? `<img src="${PNG[icon]}">` : ICON[icon];
-        const b = el(`<button class="proto-action" title="${title}">${pic}${label}</button>`);
+        const b = el(`<button class="proto-action" title="${title}">${ICON[icon]}${label}</button>`);
         b.onclick = fn; actions.appendChild(b);
       });
       if (t === 'handbook') {
@@ -302,8 +277,8 @@
       .btn-ok { background: #0e639c !important; } .btn-ok:hover { background: #1177bb !important; }
       .btn-cancel { background: #3a3d41 !important; } .btn-cancel:hover { background: #45494e !important; }
       input, select { background: #3c3c3c; color: #eee; border: 1px solid #555; border-radius: 4px; }
-      ${iconStyle === 'mono' ? `.top-icon-btn img, .cd-toolbar-button img { filter: grayscale(1) brightness(1.35); }
-      .cd-toolbar-button.active img { filter: grayscale(1) brightness(2); }` : ''}`;
+      .top-icon-btn img, .cd-toolbar-button img { filter: grayscale(1) brightness(1.35); }
+      .cd-toolbar-button.active img { filter: grayscale(1) brightness(2); }`;
     new MutationObserver(() => {
       const f = $('drawEditorFrame');
       if (!f || f.dataset.protoStyled) return;
@@ -311,112 +286,6 @@
       const apply = () => { try { f.contentDocument.head.appendChild(Object.assign(f.contentDocument.createElement('style'), { textContent: css })); } catch (e) {} };
       f.addEventListener('load', apply);
     }).observe(document.body, { childList: true });
-  }
-
-  // ========== B: мінімальні перемикачі ==========
-  function initB() {
-    const right = $('rightBar'), cons = $('consoleContainer');
-    let tab = 'gallery';
-    const btn = el('<button id="protoEdgeBtn" title="Показати/сховати панель (Ctrl+B)">‹</button>');
-    const label = el('<div id="protoEdgeLabel">Галерея · Посібник</div>');
-    right.prepend(label); right.prepend(btn);
-    const setPanel = (open, t) => {
-      if (t) tab = t;
-      right.classList.toggle('proto-closed', !open);
-      btn.textContent = open ? '›' : '‹';
-      if (open) showTab(tab);
-      state.panel = open ? 'відкрита' : 'згорнута';
-      if (!open) state.tab = '-';
-      refreshEditor();
-    };
-    setPanel(false);
-    btn.onclick = () => setPanel(right.classList.contains('proto-closed'));
-    label.onclick = () => setPanel(true);
-    window.toggleShowGallery = () => setPanel(right.classList.contains('proto-closed') || tab !== 'gallery', 'gallery');
-    window.showHandbook = () => setPanel(right.classList.contains('proto-closed') || tab !== 'handbook', 'handbook');
-
-    // консоль: завжди видима смужка-статус, клік розгортає
-    const status = el('<div id="protoStatus"><span class="arrow">▸</span><span>Консоль</span><span class="info">порожньо</span><span class="badge" style="display:none"></span></div>');
-    cons.before(status);
-    let lines = 0, unseen = 0;
-    const setCons = (open) => {
-      cons.style.display = open ? '' : 'none';
-      status.classList.toggle('open', open);
-      status.querySelector('.arrow').textContent = open ? '▾' : '▸';
-      if (open) unseen = 0;
-      const badge = status.querySelector('.badge');
-      badge.style.display = unseen ? '' : 'none'; badge.textContent = unseen;
-      state.console = open ? 'розгорнута' : 'згорнута';
-      refreshEditor();
-    };
-    setCons(false);
-    status.onclick = () => setCons(cons.style.display === 'none');
-    onOutput((n) => {
-      if (cons.style.display === 'none') unseen += Math.max(n - lines, 1);
-      lines = n;
-      status.querySelector('.info').textContent = `· ${n} ${n === 1 ? 'рядок' : 'рядків'}`;
-      setCons(true);
-    });
-    onError(() => { status.querySelector('.info').textContent = '· помилка'; setCons(true); });
-    window.showConsole = () => setCons(cons.style.display === 'none');
-    hotkeys({ b: () => btn.click(), j: window.showConsole });
-
-    // гра: вікно без блокування сторінки, тягнеться за заголовок
-    const inner = $('gameModal').firstElementChild;
-    makeDraggable(inner, inner.firstElementChild);
-    onGame(() => {});
-  }
-
-  // ========== C: шухляди ==========
-  function initC() {
-    const right = $('rightBar'), cons = $('consoleContainer');
-    const left = $('editorContainer').parentElement;
-    left.classList.add('proto-leftcol');
-    let tab = 'gallery';
-    const head = el(`<div id="protoPanelHead"><span id="protoPanelTitle"></span>
-      <button class="proto-iconbtn" title="Закрити (Esc)">✕</button></div>`);
-    right.prepend(head);
-    const titles = { gallery: 'Галерея ресурсів', handbook: 'Посібник' };
-    const setPanel = (open, t) => {
-      if (t) tab = t;
-      right.classList.toggle('proto-closed', !open);
-      if (open) { showTab(tab); $('protoPanelTitle').textContent = titles[tab]; }
-      state.panel = open ? 'висунута' : 'схована';
-      if (!open) state.tab = '-';
-    };
-    setPanel(false);
-    head.querySelector('button').onclick = () => setPanel(false);
-    window.toggleShowGallery = () => setPanel(right.classList.contains('proto-closed') || tab !== 'gallery', 'gallery');
-    window.showHandbook = () => setPanel(right.classList.contains('proto-closed') || tab !== 'handbook', 'handbook');
-    document.addEventListener('mousedown', (e) => {
-      if (!right.classList.contains('proto-closed') && !right.contains(e.target) && !e.target.closest('#toolPanel, #protoSwitcher, .modal-overlay, #importModal'))
-        setPanel(false);
-    });
-    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') setPanel(false); });
-
-    // консоль: шухляда знизу поверх редактора
-    const chead = el(`<div id="protoConsoleDrawerHead"><span>Консоль</span>
-      <span><button class="proto-iconbtn" data-a="close" title="Закрити">✕</button></span></div>`);
-    cons.before(chead);
-    const setCons = (open) => {
-      chead.style.display = cons.style.display = open ? '' : 'none';
-      state.console = open ? 'висунута' : 'схована';
-    };
-    setCons(false);
-    chead.querySelector('[data-a=close]').onclick = () => setCons(false);
-    onOutput(() => setCons(true));
-    onError(() => setCons(true));
-    window.showConsole = () => setCons(cons.style.display === 'none');
-
-    // гра: «картинка в картинці» в куті, кнопка ⤢ розгортає
-    const gm = $('gameModal');
-    const ghead = gm.firstElementChild.firstElementChild;
-    const pip = el('<button id="protoPipBtn" title="Згорнути / розгорнути">⤢</button>');
-    ghead.firstElementChild.replaceWith(pip);
-    const setPip = (on) => { gm.classList.toggle('proto-pip', on); state.game = gm.style.display === 'none' ? 'не запущена' : on ? 'в куті' : 'на весь екран'; };
-    setPip(true);
-    pip.onclick = () => setPip(!gm.classList.contains('proto-pip'));
-    onGame((shown) => shown && setPip(true));
   }
 
   // Гра більше не перекриває редактор, тому клавіші, набрані в редакторі,
@@ -434,40 +303,9 @@
     window.addEventListener('keyup', handler, true);
   }
 
-  // ---------- плаваючий перемикач ----------
-  function switcher() {
-    const i = KEYS.indexOf(key);
-    const go = (d) => {
-      const p = new URLSearchParams(location.search);
-      p.set('variant', KEYS[(i + d + KEYS.length) % KEYS.length]);
-      location.search = p.toString();
-    };
-    const bar = el(`<div id="protoSwitcher" title="ПРОТОТИП: ← / → перемикають варіанти">
-      <div class="row"><button data-d="-1">‹</button><span>${key} · ${VARIANTS[key]}</span><button data-d="1">›</button></div>
-      <div class="state"></div></div>`);
-    bar.querySelectorAll('button').forEach((b) => (b.onclick = () => go(+b.dataset.d)));
-    if (key === 'A') {
-      const t = el(`<button class="icons" title="Перемкнути стиль іконок">іконки: ${iconStyle === 'mono' ? 'однотонні' : 'кольорові'} ⇄</button>`);
-      t.onclick = () => { const p = new URLSearchParams(location.search); p.set('icons', iconStyle === 'mono' ? 'color' : 'mono'); location.search = p.toString(); };
-      bar.querySelector('.row').appendChild(t);
-    }
-    document.body.appendChild(bar);
-    window.addEventListener('keydown', (e) => {
-      const a = document.activeElement;
-      if (a && (a.matches('input, textarea, select') || a.isContentEditable)) return;
-      if (e.key === 'ArrowLeft') go(-1);
-      if (e.key === 'ArrowRight') go(1);
-    });
-    setInterval(() => {
-      bar.querySelector('.state').textContent =
-        `панель: ${state.panel} · вкладка: ${state.tab} · консоль: ${state.console} · гра: ${state.game}`;
-    }, 300);
-  }
-
   window.addEventListener('load', () => setTimeout(() => {
-    ({ A: initA, B: initB, C: initC })[key]();
+    initA();
     editorKeysStayInEditor();
-    switcher();
     refreshEditor();
   }, 0));
 })();
