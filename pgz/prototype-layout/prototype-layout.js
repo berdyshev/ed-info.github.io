@@ -64,31 +64,38 @@
       if (f) { e.preventDefault(); e.stopPropagation(); f(); }
     }, true);
   }
-  function dragResize(handle, onMove, onDone) {
-    handle.addEventListener('mousedown', (e) => {
-      if (e.target.closest('button')) return;
+  // Перетягування через pointer capture: інакше iframe посібника «з'їдає» відпускання миші,
+  // і панель далі їздить за курсором.
+  function pointerDrag(handle, onStart, onMove, onEnd) {
+    handle.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || e.target.closest('button')) return;
       e.preventDefault();
+      handle.setPointerCapture(e.pointerId);
       document.body.classList.add('proto-resizing');
+      onStart && onStart(e);
       const move = (ev) => onMove(ev);
-      const up = () => {
+      const end = () => {
         document.body.classList.remove('proto-resizing');
-        removeEventListener('mousemove', move); removeEventListener('mouseup', up);
-        onDone && onDone(); refreshEditor();
+        handle.removeEventListener('pointermove', move);
+        handle.removeEventListener('pointerup', end);
+        handle.removeEventListener('pointercancel', end);
+        onEnd && onEnd();
       };
-      addEventListener('mousemove', move); addEventListener('mouseup', up);
+      handle.addEventListener('pointermove', move);
+      handle.addEventListener('pointerup', end);
+      handle.addEventListener('pointercancel', end);
     });
   }
+  function dragResize(handle, onMove, onDone) {
+    pointerDrag(handle, null, onMove, () => { onDone && onDone(); refreshEditor(); });
+  }
   function makeDraggable(win, handle) {
-    handle.addEventListener('mousedown', (e) => {
-      if (e.target.closest('button')) return;
-      e.preventDefault();
+    let dx = 0, dy = 0;
+    pointerDrag(handle, (e) => {
       const r = win.getBoundingClientRect();
-      const dx = e.clientX - r.left, dy = e.clientY - r.top;
+      dx = e.clientX - r.left; dy = e.clientY - r.top;
       win.style.position = 'absolute';
-      const move = (ev) => { win.style.left = ev.clientX - dx + 'px'; win.style.top = ev.clientY - dy + 'px'; };
-      const up = () => { removeEventListener('mousemove', move); removeEventListener('mouseup', up); };
-      addEventListener('mousemove', move); addEventListener('mouseup', up);
-    });
+    }, (ev) => { win.style.left = ev.clientX - dx + 'px'; win.style.top = ev.clientY - dy + 'px'; });
   }
   // показати потрібний вміст правої панелі через оригінальні функції сторінки
   const origShowGallery = window.showGallery;
@@ -113,6 +120,7 @@
     toggleConsole: '<svg viewBox="0 0 24 24"><path class="fill" d="M3 14h18v4a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 14h18"/></svg>',
     // верхня панель і дії (для однотонного стилю)
     run: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" style="stroke:#4caf50"/><path d="M10 8l6 4-6 4z" style="fill:#4caf50;stroke:#4caf50"/></svg>',
+    step: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" style="stroke:#4caf50"/><path d="M9 8l5 4-5 4z" style="fill:#4caf50;stroke:#4caf50"/><path d="M16 8v8" style="stroke:#4caf50"/></svg>',
     stop: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" style="stroke:#f44336"/><rect x="9" y="9" width="6" height="6" style="fill:#f44336;stroke:#f44336"/></svg>',
     newProject: '<svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6M12 12v6M9 15h6"/></svg>',
     open: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M12 17v-6M9 13l3-3 3 3"/></svg>',
@@ -134,12 +142,14 @@
       .forEach((b) => (b.style.display = 'none'));
     document.querySelector('#toolPanel [onclick*="showConsole"]').style.display = 'none'; // замінено кнопкою розкладки
     if (iconStyle === 'mono') {
+      // src не чіпаємо: pgz за ним вирішує, що робить кнопка «Виконати» (lib.js: imgSrc === "./media/play.png").
+      // Однотонну іконку показуємо через CSS content, за ім'ям файлу в src.
       const svgUrl = (svg) => 'data:image/svg+xml,' + encodeURIComponent(
         svg.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#d4d4d4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" '));
-      const map = { btn_run: 'run', btn_stopRunning: 'stop', btn_pgz_open: 'open', btn_pgz_save: 'save', btn_restore_code: 'restore', btn_show_share: 'share', btn_show_settings: 'settings' };
-      Object.entries(map).forEach(([id, ic]) => $(id) && ($(id).src = svgUrl(ICON[ic])));
-      const np = document.querySelector('#toolPanel [onclick*="createNewProject"]');
-      if (np) np.src = svgUrl(ICON.newProject);
+      const bySrc = { 'play.png': 'run', 'step.png': 'step', 'stop.png': 'stop', 'new-project.png': 'newProject', 'pgz-open.png': 'open',
+        'pgz-save.png': 'save', 'restore-code.png': 'restore', 'share.png': 'share', 'settings.png': 'settings' };
+      const css = Object.entries(bySrc).map(([f, ic]) => `#toolPanel img[src$="${f}"] { content: url("${svgUrl(ICON[ic])}"); }`).join('\n');
+      document.head.appendChild(el(`<style id="protoMonoIcons">${css}</style>`));
     }
 
     // кнопки розкладки, як у правому верхньому куті VS Code
