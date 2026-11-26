@@ -1,0 +1,17 @@
+/* Макет pgz у стилі IDE (issue #73): спільні стилі. */
+
+.ide-icon {
+  width: 20px; height: 20px; flex: 0 0 auto;
+  fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* маленька кнопка-іконка в заголовках панелей */
+.ide-iconbtn {
+  all: unset; display: grid; place-items: center; cursor: pointer; color: #ccc; padding: 3px; border-radius: 4px;
+}
+.ide-iconbtn:hover { background: #ffffff22; color: #fff; }
+.ide-iconbtn .ide-icon { width: 16px; height: 16px; }
+
+/* під час перетягування iframe і редактор не перехоплюють мишу */
+.ide-dragging { user-select: none; }
+.ide-dragging iframe, .ide-dragging .CodeMirror { pointer-events: none; }
