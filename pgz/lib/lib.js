@@ -1899,10 +1899,10 @@ if(localStorage.loadAction === "restoreCode") {
                         PythonIDE.saveChoice();
                         break;
                     case 'btn_run':
+                        // режим запуску зберігається в data-mode (див. radio_run_mode_*)
                         const btnRun = document.getElementById('btn_run');
-                        const imgSrc = btnRun ? btnRun.getAttribute('src') : '';
-                        if (imgSrc === "./media/play.png") PythonIDE.runCode();
-                        if (imgSrc === "./media/step.png") PythonIDE.runCode("step");
+                        if (btnRun && btnRun.dataset.mode === "step") PythonIDE.runCode("step");
+                        else PythonIDE.runCode();
                         break;
                 }
             });
@@ -2011,12 +2011,12 @@ initSettings: function() {
                     case 'radio_run_mode_all':
                         PythonIDE.runMode = "normal";
                         const btnRun = document.getElementById('btn_run');
-                        if (btnRun) btnRun.src = "./media/play.png";
+                        if (btnRun) { btnRun.dataset.mode = "normal"; btnRun.src = "./media/play.png"; }
                         break;
                     case 'radio_run_mode_single':
                         PythonIDE.runMode = "step";
                         const btnRunStep = document.getElementById('btn_run');
-                        if (btnRunStep) btnRunStep.src = "./media/step.png";
+                        if (btnRunStep) { btnRunStep.dataset.mode = "step"; btnRunStep.src = "./media/step.png"; }
                         break;
                     case 'radio_run_mode_anim':
                         PythonIDE.runMode = "anim";
