@@ -1,0 +1,91 @@
+/* Діалоги і редактор зображень в єдиному темному стилі (як у VS Code). */
+
+.ide-layout .modal-overlay,
+.ide-layout #newProjectModal,
+.ide-layout #importModal,
+.ide-layout .error-modal-overlay,
+.ide-layout #imageEditorModal { background: rgba(0, 0, 0, .55) !important; backdrop-filter: blur(2px) !important; }
+
+.ide-layout .modal-content,
+.ide-layout .modal-mcontent,
+.ide-layout .modal-error {
+  background: #252526 !important; color: #cccccc !important; border: 1px solid #3c3c3c !important;
+  border-radius: 10px !important; box-shadow: 0 16px 48px rgba(0, 0, 0, .6) !important;
+  font: 13px/1.5 system-ui, "Segoe UI", sans-serif !important; padding: 0 !important; overflow: hidden;
+}
+/* шрифт інтерфейсу, але не для іконок Font Awesome (<i class="fa ...">) */
+.ide-layout :is(.modal-content, .modal-mcontent, .modal-error) :not(i):not(.fa):not([class*="fa-"]) { font-family: system-ui, "Segoe UI", sans-serif; }
+.ide-layout .CodeMirror, .ide-layout .CodeMirror *, .ide-layout .error-message { font-family: monospace !important; }
+
+.ide-layout .modal-header,
+.ide-layout .error-modal-header {
+  background: transparent !important; border-bottom: 1px solid #3c3c3c !important; padding: 10px 14px !important;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.ide-layout .modal-title, .ide-layout .error-modal-header h3, .ide-layout #modal-title {
+  font: 600 14px system-ui, sans-serif !important; color: #ffffff !important; margin: 0 !important; letter-spacing: 0 !important;
+}
+.ide-layout .error-modal-header h3::before { content: "● "; color: #f14c4c; }
+.ide-layout .modal-close {
+  background: none !important; border: 0 !important; color: #aaaaaa !important; font-size: 20px !important;
+  width: 28px; height: 28px; border-radius: 6px !important; cursor: pointer; line-height: 1;
+}
+.ide-layout .modal-close:hover { background: #ffffff1a !important; color: #fff !important; }
+.ide-layout .modal-body, .ide-layout #newProjectModal form, .ide-layout .modal-mcontent > p { padding: 14px !important; }
+.ide-layout .modal-mcontent > h3 { padding: 12px 14px; border-bottom: 1px solid #3c3c3c; }
+.ide-layout .modal-footer, .ide-layout .modal-buttons {
+  background: transparent !important; border-top: 1px solid #3c3c3c !important; padding: 10px 14px !important;
+  display: flex; justify-content: flex-end; gap: 8px;
+}
+.ide-layout .modal-content label, .ide-layout .modal-content p { color: #cccccc !important; }
+
+/* поля вводу */
+.ide-layout :is(.modal-content, .modal-mcontent) :is(input[type=text], input[type=number], select, textarea) {
+  background: #3c3c3c !important; color: #eeeeee !important; border: 1px solid #555 !important;
+  border-radius: 4px !important; padding: 6px 8px !important; font: 13px system-ui, sans-serif !important; outline: none;
+}
+.ide-layout :is(.modal-content, .modal-mcontent) :is(input, select, textarea):focus { border-color: #007acc !important; box-shadow: 0 0 0 1px #007acc; }
+.ide-layout .modal-content input[type=range] { accent-color: #007acc; }
+.ide-layout .modal-content input[type=radio] { accent-color: #007acc; }
+
+/* кнопки: одна основна (синя), решта нейтральні, небезпечна — лише червоний текст */
+.ide-layout :is(.btn-primary, .btn-ok, #newProjectModal button[type=submit], #importFileBtnContainer button, #recoverModal .modal-info + * button, .btn-restore) {
+  background: #0e639c !important; color: #fff !important; border: 0 !important; border-radius: 4px !important;
+  padding: 6px 14px !important; font: 13px system-ui, sans-serif !important; cursor: pointer; box-shadow: none !important; transform: none !important;
+}
+.ide-layout :is(.btn-primary, .btn-ok, #newProjectModal button[type=submit], #importFileBtnContainer button):hover { background: #1177bb !important; }
+.ide-layout :is(.btn-secondary, .btn-cancel, #newProjectModal button[type=button]) {
+  background: #3a3d41 !important; color: #fff !important; border: 0 !important; border-radius: 4px !important;
+  padding: 6px 14px !important; font: 13px system-ui, sans-serif !important; cursor: pointer; box-shadow: none !important; transform: none !important;
+}
+.ide-layout :is(.btn-secondary, .btn-cancel, #newProjectModal button[type=button]):hover { background: #45494e !important; }
+.ide-layout .btn-danger {
+  background: transparent !important; color: #f48771 !important; border: 1px solid #f48771 !important; border-radius: 4px !important;
+  padding: 5px 13px !important; font: 13px system-ui, sans-serif !important; cursor: pointer;
+}
+.ide-layout .btn-danger:hover { background: #f4877122 !important; }
+
+/* «Файли»: нейтральні картки замість зеленої/синьої/сірої */
+.ide-layout .file-action-button {
+  background: #2d2d30 !important; color: #cccccc !important; border: 1px solid #3c3c3c !important;
+  border-radius: 8px !important; box-shadow: none !important;
+}
+.ide-layout .file-action-button:hover { border-color: #007acc !important; background: #2a2d2e !important; transform: none !important; }
+.ide-layout .file-action-button .card-header { border-bottom-color: #3c3c3c !important; }
+.ide-layout .file-action-button .card-header h3 { color: #ffffff !important; }
+.ide-layout .file-action-button .card-header i { color: #4fc3f7 !important; }
+.ide-layout .file-action-button :is(code, kbd, .shortcut, blockquote, pre) { background: #1e1e1e !important; border-color: #007acc !important; color: #ccc !important; }
+
+/* повідомлення про помилку */
+.ide-layout .error-message { background: #1e1e1e !important; border-left: 3px solid #f14c4c !important; color: #f48771 !important; border-radius: 4px; }
+
+/* інформаційні блоки (відновлення коду тощо) */
+.ide-layout .modal-info { background: #1e1e1e !important; border-left: 3px solid #007acc !important; color: #cccccc !important; }
+.ide-layout .modal-content [class*=warning] { background: #1e1e1e !important; border-left: 3px solid #cca700 !important; color: #cccccc !important; }
+
+/* імпорт: категорії-«чипи» */
+.ide-layout #importCategories button { background: #3a3d41 !important; border: 0 !important; color: #ddd !important; padding: 3px 10px !important; border-radius: 999px !important; font: 12px system-ui, sans-serif !important; }
+.ide-layout #importCategories button[style*="0, 123, 255"], .ide-layout #importCategories button[style*="#007bff"] { background: #0e639c !important; color: #fff !important; }
+
+/* редактор зображень (iframe): рамка */
+.ide-layout #drawEditorFrame { border: 1px solid #3c3c3c !important; border-radius: 10px !important; box-shadow: 0 16px 48px rgba(0, 0, 0, .6); background: #1e1e1e !important; }
