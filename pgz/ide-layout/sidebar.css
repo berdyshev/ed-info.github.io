@@ -1,0 +1,51 @@
+/* Бокова панель праворуч і смуга активностей. */
+
+.ide-layout #splashImg { display: none !important; }
+
+.ide-layout #rightBar {
+  flex: 0 0 var(--ide-panel-width, 400px) !important; width: auto !important; max-width: none !important;
+  margin: 20px 0 20px 6px !important; position: relative; overflow: hidden;
+  display: flex !important; flex-direction: column; background: #1e1e1e !important; border-radius: 10px;
+}
+.ide-layout #rightBar.ide-closed { display: none !important; }
+.ide-layout #handbook { margin: 0 !important; flex: 1; height: auto !important; width: 100%; border: 0; }
+
+/* галерея: показується одна рамка (зображення, аудіо або музика) на всю висоту */
+.ide-layout #resourceGallery { flex: 1; overflow: auto; margin: 0 !important; }
+.ide-layout #resourceGallery .frame {
+  width: auto; height: calc(100% - 20px); max-height: none !important; margin: 10px; box-sizing: border-box;
+}
+.ide-layout #resourceGallery .frame h3 { display: none; } /* назва є в заголовку панелі */
+.ide-layout #resourceGallery .assets-items-scroll { max-width: none; flex: 1; }
+/* «➕» переїхав у заголовок панелі; рядок лишається, лише коли щось вибрано */
+.ide-layout #resourceGallery .controls-bar > button:first-child { display: none; }
+.ide-layout #resourceGallery .controls-bar:not(:has(.file-controls[style*="inline"])) { display: none; }
+
+#idePanelHead {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 36px; padding: 2px 8px;
+  background: #252526; color: #ddd; font: 600 12px system-ui, sans-serif;
+}
+#idePanelTitle { margin-right: auto; letter-spacing: .05em; text-transform: uppercase; }
+#idePanelActions { display: flex; flex-wrap: wrap; gap: 4px; width: 100%; padding-bottom: 6px; }
+#idePanelActions:empty { display: none; }
+.ide-action {
+  all: unset; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px;
+  background: #3a3d41; color: #eee; font: 12px system-ui, sans-serif;
+}
+.ide-action:hover { background: #007acc; }
+.ide-action .ide-icon { width: 16px; height: 16px; }
+
+#idePanelResizer { position: absolute; left: 0; top: 0; bottom: 0; width: 6px; cursor: col-resize; z-index: 5; }
+#idePanelResizer:hover, .ide-dragging #idePanelResizer { background: #007acc; }
+
+#ideActivityBar {
+  flex: 0 0 68px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding-top: 20px; margin-right: 6px; background: #2a2a2a;
+}
+#ideActivityBar button {
+  all: unset; cursor: pointer; width: 66px; padding: 6px 0; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  color: #aaa; border-right: 3px solid transparent; font: 10px system-ui, sans-serif;
+}
+#ideActivityBar button:hover { color: #fff; background: #ffffff10; }
+#ideActivityBar button.active { color: #fff; border-right-color: #4fc3f7; }
+#ideActivityBar .ide-icon { width: 24px; height: 24px; stroke-width: 1.5; }
