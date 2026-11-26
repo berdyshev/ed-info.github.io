@@ -1,0 +1,5 @@
+/* Гра у плаваючому вікні: решта сторінки лишається доступною. */
+
+.ide-layout #gameModal { pointer-events: none; }
+.ide-layout #gameModal > div { pointer-events: auto; box-shadow: 0 10px 40px rgba(0, 0, 0, .7); }
+.ide-layout #gameModal > div > div:first-child { cursor: move; }
