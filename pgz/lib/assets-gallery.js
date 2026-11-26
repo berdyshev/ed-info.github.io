@@ -593,7 +593,12 @@ document.addEventListener('click', function(e) {
   }
 });
 // --- ДРАГ-ЕНД-ДРОП ФУНКЦІОНАЛ ---
+// Обробники вішаються на document, тож додаємо їх лише раз:
+// initializeAssetsGallery() викликається при кожному відкритті галереї.
+let dragAndDropEnabled = false;
 function enableDragAndDrop() {
+  if (dragAndDropEnabled) return;
+  dragAndDropEnabled = true;
   // Робимо елементи галереї перетягуваними
 document.addEventListener('dragstart', function(e) {
     console.log("Drag Start")
