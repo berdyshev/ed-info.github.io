@@ -1,0 +1,13 @@
+/* Консоль знизу, як нижня панель у VS Code. */
+
+.ide-layout #consoleContainer {
+  height: var(--ide-console-height, 200px) !important; min-height: 60px !important; max-height: none !important;
+  margin-top: 0 !important; border-radius: 0 0 10px 10px !important;
+}
+
+#ideConsoleHead {
+  display: flex; align-items: center; gap: 2px; height: 28px; margin: 6px 0 0 10px; padding: 0 8px;
+  background: #252526; color: #ddd; border-radius: 10px 10px 0 0; cursor: row-resize;
+  font: 600 12px system-ui, sans-serif; letter-spacing: .05em; text-transform: uppercase;
+}
+.ide-console-tab { margin-right: auto; padding: 4px 2px; border-bottom: 2px solid #007acc; cursor: default; }
